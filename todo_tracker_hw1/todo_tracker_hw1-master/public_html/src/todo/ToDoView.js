@@ -59,12 +59,56 @@ export default class ToDoView {
         this.clearItemsList();
 
         for (let i = 0; i < list.items.length; i++) {
-            // NOW BUILD ALL THE LIST ITEMS
+            let listItem = list.items[i];
+
+            let listItemElement = document.createElement("div");
+            listItemElement.setAttribute("id", "todo-list-item-" + listItem.id);
+            listItemElement.setAttribute("class", "list-item-card");
+            
+            let taskElement = document.createElement("div");
+            taskElement.setAttribute("class", "task-col");
+            taskElement.innerHTML+=listItem.description;
+
+            taskElement.ondblclick = function() {
+                taskElement.contentEditable = true;
+            }
+            taskElement.onblur = function(){
+                console.log("Exited task");
+                if(taskElement.innerText==null || taskElement.innerText=="")
+                    taskElement.innerText="Unknown: Please assign a task";
+            }
+            taskElement.addEventListener("keydown", (e) => {
+                if(e.keyCode === 13){
+                    taskElement.blur();
+                }
+            });
+            listItemElement.appendChild(taskElement);
+
+            let dueDateElement = document.createElement("div");
+            dueDateElement.setAttribute("class", "due-date-col");
+            dueDateElement.setAttribute("type", "date");
+            dueDateElement.innerHTML+=listItem.dueDate;
+            dueDateElement.ondblclick = function() {
+                dueDateElement.contentEditable = true;
+            }
+            listItemElement.appendChild(dueDateElement);
+
+            let statusElement = document.createElement("div");
+            statusElement.setAttribute("class", "status-col");
+            statusElement.innerHTML+=listItem.status;
+            statusElement.ondblclick = function() {
+                statusElement.contentEditable = true;
+            }
+            listItemElement.appendChild(statusElement);
+
+
+
+            /*/ NOW BUILD ALL THE LIST ITEMS
             let listItem = list.items[i];
             let listItemElement = "<div id='todo-list-item-" + listItem.id + "' class='list-item-card'>"
-                                + "<div class='task-col'>" + listItem.description + "</div>"
-                                + "<div class='due-date-col'>" + listItem.dueDate + "</div>"
-                                + "<div class='status-col'>" + listItem.status + "</div>"
+                                + "<div id='todo-list-task-'" + " class='task-col'>" + listItem.description + "</div>"
+                                + "<div id="+"todo-list-due-date" + " class='due-date-col'>" + listItem.dueDate + "</div>"
+                                + "<div id="+"todo-list-status" + " class='status-col'>" + listItem.status + "</div>"
                                 + "<div class='list-controls-col'>"
                                 + " <div class='list-item-control material-icons'>keyboard_arrow_up</div>"
                                 + " <div class='list-item-control material-icons'>keyboard_arrow_down</div>"
@@ -73,6 +117,8 @@ export default class ToDoView {
                                 + " <div class='list-item-control'></div>"
                                 + "</div>";
             itemsListDiv.innerHTML += listItemElement;
+            */
+            itemsListDiv.appendChild(listItemElement);
         }
     }
 
