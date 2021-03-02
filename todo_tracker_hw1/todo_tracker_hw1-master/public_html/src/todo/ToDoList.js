@@ -15,6 +15,8 @@ export default class ToDoList {
         this.id = initId;
         this.name = "Unnknown";
         this.items = [];
+        //Determines whether or not this list is at index 0
+        this.indexOfZero = false;
     }   
     
     // GETTER/SETTER METHODS
@@ -31,6 +33,9 @@ export default class ToDoList {
         return this.id;
     }
 
+    setCurrentList(){
+        this.indexOfZero = !this.indexOfZero;
+    }
     /**
      * Adds an item to the end of the list.
      * 
@@ -64,11 +69,23 @@ export default class ToDoList {
         for (let i = 0; i < this.items.length; i++) {
             let testItem = this.items[i];
             if (testItem === item) {
+                //this.shiftToListTop(i);
+                //return 0;
                 return i;
             }
         }
         return -1;
     }
+/*
+    shiftToListTop(index) {
+        let originalHead = this.items[0];
+        this.items[0] = this.items[index];
+        for(let i = 1; i< this.items.length; i++){
+            tempItem = this.items[i];
+            this.items[i] = originalHead;
+            originalHead = tempItem;
+        }
+    }*/
 
     /**
      * Gets and returns the item at the index location.

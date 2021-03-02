@@ -26,6 +26,8 @@ export default class ToDoModel {
 
         // WE'LL USE THIS TO ASSIGN ID NUMBERS TO EVERY LIST ITEM
         this.nextListItemId = 0;
+
+        
     }
 
     /**
@@ -86,10 +88,13 @@ export default class ToDoModel {
      */
     addNewList(initName) {
         let newList = new ToDoList(this.nextListId++);
-        if (initName)
+        if (initName){
             newList.setName(initName);
-        this.toDoLists.push(newList);
+        }
+        
+        this.toDoLists.unshift(newList);
         this.view.appendNewListToView(newList);
+        this.view.refreshLists(this.toDoLists)
         return newList;
     }
 
@@ -121,13 +126,30 @@ export default class ToDoModel {
     loadList(listId) {
         let listIndex = -1;
         for (let i = 0; (i < this.toDoLists.length) && (listIndex < 0); i++) {
-            if (this.toDoLists[i].id === listId)
+            if (this.toDoLists[i].id === listId){
                 listIndex = i;
+                this.toDoLists[i].indexOfZero=false;
+            }
         }
-        if (listIndex >= 0) {
+        console.log("All lists reverted to false");
+        if(listIndex==0){
             let listToLoad = this.toDoLists[listIndex];
             this.currentList = listToLoad;
             this.view.viewList(this.currentList);
+            
+        }
+        else if (listIndex > 0) {
+            var tempList = this.toDoLists[listIndex];
+            
+            this.toDoLists.splice(listIndex, 1);
+            this.toDoLists.unshift(tempList);
+            this.currentList = tempList;
+            
+            this.toDoLists[0].setCurrentList();
+            console.log(this.toDoLists[0].indexOfZero);
+            this.view.viewList(this.currentList);
+            this.view.refreshLists(this.toDoLists);
+            console.log(this.toDoLists);
         }
     }
 
@@ -153,14 +175,23 @@ export default class ToDoModel {
      */
     removeCurrentList() {
         let indexOfList = -1;
-        for (let i = 0; (i < this.toDoLists.length) && (indexOfList < 0); i++) {
-            if (this.toDoLists[i].id === this.currentList.id) {
-                indexOfList = i;
+        let txt = "";
+        var confirmElement = confirm("Proceed with list deletion?");
+        if (confirmElement == false) {
+            txt = "You pressed Cancel!";
+          } else {
+            txt = "You pressed OK!";
+          
+            for (let i = 0; (i < this.toDoLists.length) && (indexOfList < 0); i++) {
+                if (this.toDoLists[i].id === this.currentList.id) {
+                    indexOfList = i;
+                }
             }
+            this.toDoLists.splice(indexOfList, 1);
+            this.currentList = null;
+            this.view.clearItemsList();
         }
-        this.toDoLists.splice(indexOfList, 1);
-        this.currentList = null;
-        this.view.clearItemsList();
+        console.log(txt);
         this.view.refreshLists(this.toDoLists);
     }
 

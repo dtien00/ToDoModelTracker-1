@@ -13,12 +13,16 @@
     --swatch-text:          #e9edf0; /* USED IN MOUSE-OVER SELECTION OF TEXT AND BORDERS */ 
     --swatch-text-accent:   #ffc819; /* USED IN MOUSE-OVER SELECTION OF TEXT AND BORDERS */  
 
-    --font-primary:         'Lexend Exa', sans-serif;
+    --font-primary:         'Consolas', sans-serif;
 }
-
+body{
+    font-family: var(--font-primary);
+    font-weight: bold;
+}
 #grid-container {
     background-color: var(--swatch-foundation);
     font-family: var(--font-primary);
+    font-size: 14pt;
 }
 
 .grid-item {
@@ -37,24 +41,40 @@
 #workspace {
     background-color: var(--swatch-primary);
     color: rgb(233,237,240);
+    padding-left: 5px;
 }
 
 #title-div {
     color: rgb(255,200,25);
     font-weight: bold;
-    font-size: 14pt;
+    font-size: 20pt;
 }
 
 #left-sidebar-header {
-    border-bottom: dotted;
+    border-bottom: solid;
+    padding-bottom: 2px;
 }
 
 #todo-list-table-header {
-    border-bottom: dotted;
+    border-bottom: solid;
+}
+
+#todo-lists-list{
+    background-color: var(--swatch-complement);
+    height: 800px;
+    width: auto;
+    overflow-y: auto;
+}
+
+#todo-list-items-div{
+    /* background-color: var(--swatch-complement);
+    height: 800px;
+    width: auto; */
+    overflow-y: auto;
 }
 
 .list-header-card {
-    border-bottom: dotted;
+    border-bottom: solid;
 }
 
 .list-item-card {
@@ -64,8 +84,21 @@
 .todo_button {
     cursor:pointer;
     background-color: var(--swatch-complement);
+    
 }
 
 .todo_button:hover {
     background-color: var(--swatch-contrast);
+}
+
+.todo_button:focus-visible {
+    background-color: var(--swatch-complement);
+}
+
+.table-entry-button {
+    display: flex;
+}
+.material-icons {
+    padding: auto;
+    margin: 5%;
 }
