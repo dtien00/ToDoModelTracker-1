@@ -9,7 +9,7 @@ export default class ToDoView {
     constructor() {}
 
     // ADDS A LIST TO SELECT FROM IN THE LEFT SIDEBAR
-    appendNewListToView(newList) {
+    appendNewListToView(newList, decision) {
         // GET THE UI CONTROL WE WILL APPEND IT TO
         let listsElement = document.getElementById("todo-lists-list");
 
@@ -22,28 +22,29 @@ export default class ToDoView {
         if(newList.indexOfZero==true){
             listElement.style.background = "#40454e";
             listElement.style.color = "#ffc819";
+            if(decision==true){
+                listElement.contentEditable = true;
+            }
         }
         else if(newList.indexOfZero==false){
             listElement.style.background = "#353a44";
         }
         listElement.onblur = function (){
-            console.log("Onblurred");
-            console.log(listElement.innerText);
-            console.log(listElement.innerHTML);
             listElement.contentEditable = false;
             if(listElement.innerText==null || listElement.innerText==="")
                     listElement.innerText="Unknown";
+            // if(decision==true){
+            //     listsElement.replaceChild(listElement, zerothFirstElement);
+            // }
 
         }
         listElement.onclick = function (){
             listElement.contentEditable = true;
             listElement.style.background = "#40454e";
-            console.log("ToDO clicked");
         }
         listElement.addEventListener("keydown", (e) => {
             listElement.style.background = "#353a44";
             if(e.keyCode === 13){
-                console.log("enter recorded");
                 listElement.blur();
             }
         });
@@ -52,11 +53,19 @@ export default class ToDoView {
         // SETUP THE HANDLER FOR WHEN SOMEONE MOUSE CLICKS ON OUR LIST
         let thisController = this.controller;
         listElement.onmousedown = function() {
+            
+            //Because we open a list, disable the add-list button
+            // thisController.createDisableAddList(true);
+            document.getElementById("add-list-button").style.cursor = "default";
+            document.getElementById("add-list-button").style.color = "#353a44";
+            document.getElementById("add-list-button").style.background = "#40454e";
             thisController.handleLoadList(newList.id);
         }
     }
 
-    // REMOVES ALL THE LISTS FROM THE LEFT SIDEBAR
+    indexZeroSelectedFirst(firstList) {
+    }
+
     clearItemsList() {
         let itemsListDiv = document.getElementById("todo-list-items-div");
         // BUT FIRST WE MUST CLEAR THE WORKSPACE OF ALL CARDS BUT THE FIRST, WHICH IS THE ITEMS TABLE HEADER
@@ -67,7 +76,7 @@ export default class ToDoView {
     }
 
     // REFRESHES ALL THE LISTS IN THE LEFT SIDEBAR
-    refreshLists(lists) {
+    refreshLists(lists, decision) {
         // GET THE UI CONTROL WE WILL APPEND IT TO
         let listsElement = document.getElementById("todo-lists-list");
         listsElement.innerHTML = "";
@@ -75,21 +84,23 @@ export default class ToDoView {
             if(i>0)
                 lists[i].indexOfZero = false;
             let list = lists[i];
-            this.appendNewListToView(list);
+            this.appendNewListToView(list, decision);
         }
     }
 
     // LOADS THE list ARGUMENT'S ITEMS INTO THE VIEW
     viewList(list) {
+        // thisController.createDisableAddList();
+
         // WE'LL BE ADDING THE LIST ITEMS TO OUR WORKSPACE
         let itemsListDiv = document.getElementById("todo-list-items-div");
         list.ondblclick = function(){
             list.contentEditable = true;
-            console.log("TESTITEMLIST");
         }
         // GET RID OF ALL THE ITEMS
         this.clearItemsList();
 
+        let thisController = this.controller;
         //After cleaning the slate, rebuild it:
 
         for (let i = 0; i < list.items.length; i++) {
@@ -98,26 +109,22 @@ export default class ToDoView {
             let listItemElement = document.createElement("div");
             listItemElement.setAttribute("id", "todo-list-item-" + listItem.id);
             listItemElement.setAttribute("class", "list-item-card");
-            
 
             //Creation of the task column
             let taskElement = document.createElement("div");
             taskElement.setAttribute("class", "task-col");
+            taskElement.setAttribute("id", "task-text-" + listItem.id);
             taskElement.innerHTML = listItem.description;
-/* 
-            let taskInputElement = document.createElement("INPUT");
-            taskInputElement.setAttribute("type", "text");
-            taskInputElement.style.color = "white";
-            taskInputElement.style.background = "#353a44";
-            taskInputElement.value = listItem.description;
-*/
+            let oldTask = null;
             taskElement.onclick = function() {
                 taskElement.contentEditable = true;
+                oldTask = taskElement.innerHTML;
             }
             taskElement.onblur = function(){
-                console.log("Exited task");
                 if(taskElement.innerText==null || taskElement.innerText=="")
                 taskElement.innerText="Unknown: Please assign a task";
+                var newTask = taskElement.innerHTML
+                thisController.createTaskChangeTransaction(oldTask, newTask, i);
             }
             taskElement.addEventListener("keydown", (e) => {
                 if(e.keyCode === 13){
@@ -132,14 +139,30 @@ export default class ToDoView {
             //Creation of the due date column
             let dueDateElement = document.createElement("div");
             dueDateElement.setAttribute("class", "due-date-col");
+            dueDateElement.setAttribute("id", "due-date-div-" + listItem.id)
+            dueDateElement.innerHTML = listItem.dueDate;
             let dueDateInputElement = document.createElement("input");
+            dueDateInputElement.setAttribute("id", "due-date-input-" + listItem.id);
             dueDateInputElement.type = "date";
             dueDateInputElement.style.color = "white";
             dueDateInputElement.style.background = "#353a44";
             dueDateInputElement.value = listItem.dueDate;
-            dueDateElement.appendChild(dueDateInputElement);
+            let oldDate = null;
+            //dueDateElement.appendChild(dueDateInputElement);
             dueDateElement.onclick = function() {
                 dueDateElement.contentEditable = true;
+                oldDate = listItem.getDueDate();
+                listItemElement.replaceChild(dueDateInputElement, dueDateElement);
+            }
+            dueDateInputElement.onblur = function(){
+                dueDateElement.contentEditable = false;
+                var newDate = dueDateInputElement.value;
+                dueDateInputElement.value = newDate;
+                listItem.setDueDate(newDate);
+                listItemElement.replaceChild(dueDateElement, dueDateInputElement);
+                dueDateElement.innerHTML = newDate;
+                thisController.createDateChangeTransaction(oldDate, newDate, i);
+
             }
             listItemElement.appendChild(dueDateElement);
 
@@ -170,10 +193,11 @@ export default class ToDoView {
             incompleteStatusElement.setAttribute("value", "incomplete");
             incompleteStatusElement.innerHTML = "incomplete";
             statusOptionsElement.appendChild(incompleteStatusElement);
-
+            let originalStatus = null;
             statusOptionsElement.style.background = "#353a44";
             statusOptionsElement.style.color = "white";
             statusElement.onclick = function(){
+                originalStatus = listItem.getStatus();  //Original status before change
                 listItemElement.replaceChild(statusOptionsElement, statusElement);
                 statusOptionsElement.focus();
 
@@ -186,6 +210,7 @@ export default class ToDoView {
                     else if(statusElement.innerText=="incomplete"){
                         statusElement.style.color = "#fca234";
                     }
+                    thisController.createStatusChangeTransaction(originalStatus, statusElement.innerText, i);
                 }
                 
                 statusElement.onblur = function(){
@@ -200,38 +225,85 @@ export default class ToDoView {
             
             listItemElement.appendChild(statusElement);
 
+            //Function to be used for up and down buttons to swap element IDS
+            
+
             //Creates a space for all the buttons
             let listButtonElements = document.createElement("div");
             listButtonElements.setAttribute("class", "button-group");
             listButtonElements.setAttribute("id", "button-group-" + listItem.id);
+
             //Create the move-up button
-            let moveUpButtonElement = document.createElement("div");
-            listButtonElements.setAttribute("class", "table-entry-button");
+            let moveUpButtonElement = document.createElement("button");
+            moveUpButtonElement.setAttribute("id", "up-button-" + listItem.id)
+            moveUpButtonElement.setAttribute("class", "table-entry-button");
             var moveUpButtonImage = document.createElement("i");
             moveUpButtonImage.className = "material-icons";
             moveUpButtonImage.innerHTML = "keyboard_arrow_up";
 
+            //Function when up button is clicked
+            moveUpButtonElement.onclick = function(){
+                if(i!=0){
+                    thisController.createItemUpTransaction(i);
+                }
+            }
+            
+            //If this element is at the top, disable the click function
+            if(i==0){
+                moveUpButtonElement.style.cursor = "default";
+                moveUpButtonElement.style.color = "#353a44";
+                moveUpButtonElement.disabled = true;
+            }
+            else{
+                // moveUpButtonElement.style.cursor = "pointer";
+                // moveUpButtonElement.style.color = "#d9d6cc";
+                moveUpButtonElement.disabled = false;
+            }
+            //Combines the image with the button
             moveUpButtonElement.appendChild(moveUpButtonImage);
 
+
             //Create the move-down button
-            let moveDownButtonElement = document.createElement("div");
-            listButtonElements.setAttribute("class", "table-entry-button");
+            let moveDownButtonElement = document.createElement("button");
+            moveDownButtonElement.setAttribute("class", "table-entry-button");
             var moveDownButtonImage = document.createElement("i");
             moveDownButtonImage.className = "material-icons";
             moveDownButtonImage.innerHTML = "keyboard_arrow_down";
 
+            //Combines the image with the button
             moveDownButtonElement.appendChild(moveDownButtonImage);
 
+            //If this element is at the bottom, disable the click function
+            if(i==list.items.length-1){
+                moveDownButtonElement.style.cursor = "default";
+                moveDownButtonElement.style.color = "#353a44";
+                moveDownButtonElement.disabled = true;
+            }
+            else{
+                // moveDownButtonElement.style.cursor = "pointer";
+                // moveDownButtonElement.style.color = "#d9d6cc";
+                moveDownButtonElement.disabled = false;
+            }
+
+            //Function when down button is clicked
+            moveDownButtonElement.onclick = function(){
+                thisController.createItemDownTransaction(i);
+            }
+
             //Create the delete button
-            let deleteItemButtonElement = document.createElement("div");
+            let deleteItemButtonElement = document.createElement("button");
             deleteItemButtonElement.setAttribute("class", "table-entry-button");
             var deleteItemButtonImage = document.createElement("i");
             deleteItemButtonImage.className = "material-icons";
             deleteItemButtonImage.innerHTML = "close";
 
+            //Combines the image with the button
             deleteItemButtonElement.appendChild(deleteItemButtonImage);
 
-
+            //Function when delete button is clicked
+            deleteItemButtonElement.onclick = function(){
+                thisController.createRemoveListItemTransaction(listItem, i);
+            }
 
             //Adds up button to the list button elements
             listButtonElements.appendChild(moveUpButtonElement);
@@ -242,7 +314,7 @@ export default class ToDoView {
             //Adds all buttons to the listElement
             listItemElement.appendChild(listButtonElements);
 
-            /*/ NOW BUILD ALL THE LIST ITEMS
+            /*// NOW BUILD ALL THE LIST ITEMS
             let listItem = list.items[i];
             let listItemElement = "<div id='todo-list-item-" + listItem.id + "' class='list-item-card'>"
                                 + "<div id='todo-list-task-'" + " class='task-col'>" + listItem.description + "</div>"
@@ -265,4 +337,5 @@ export default class ToDoView {
     setController(initController) {
         this.controller = initController;
     }
+
 }

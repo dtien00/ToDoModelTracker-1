@@ -67,6 +67,10 @@
     flex-direction: column;
 }
 
+#due-date-input {
+    width:25%;
+}
+
 .status-col {
     width:25%;
 }
@@ -78,5 +82,15 @@
 }
 
 .list-item-control {
-    width: 0%;
+    width: 25%;
+}
+
+.button-group {
+    display: flex;
+    padding-bottom: 5%;
+    margin-left: 10%;
+}
+
+.table-entry-button {
+    margin: 5%;
 }

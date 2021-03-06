@@ -31,6 +31,18 @@ body{
 
 #navbar {
     box-shadow: 2px 2px 2px var(--swatch-primary); 
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+#redo-button{
+    filter: invert(0.0);
+}
+
+#undo-button{
+    filter: invert(0.0);
 }
 
 #left-sidebar {
@@ -88,7 +100,7 @@ body{
 }
 
 .todo_button:hover {
-    background-color: var(--swatch-contrast);
+    background-color: var(--swatch-primary);
 }
 
 .todo_button:focus-visible {
@@ -96,9 +108,14 @@ body{
 }
 
 .table-entry-button {
-    display: flex;
+    color: var(--swatch-foundation);
+    background-color: var(--swatch-primary);
+    border: none;
+    padding-bottom: 25%;
 }
-.material-icons {
-    padding: auto;
-    margin: 5%;
+
+.table-entry-button:hover {
+    cursor: pointer;
+    color: var(--swatch-contrast);
+    background-color: var(--swatch-foundation);
 }

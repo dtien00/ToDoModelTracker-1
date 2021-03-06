@@ -43,6 +43,14 @@ export class ToDoTrackerApp {
                 }
             }
         };
+        // document.getElementById("undo-button").disabled = true;
+        //     document.getElementById("undo-button").style.cursor = "default";
+        //     document.getElementById("undo-button").style.color = "#353a44";
+        //     document.getElementById("undo-button").style.background = "#40454e";
+        //     document.getElementById("redo-button").disabled = true;
+        //     document.getElementById("redo-button").style.cursor = "default";
+        //     document.getElementById("redo-button").style.color = "#353a44";
+        //     document.getElementById("redo-button").style.background = "#40454e";
         xmlhttp.open("GET", testFile, true);
         xmlhttp.send();
     }
